@@ -1,0 +1,4 @@
+dotenv
+setuptools
+requests
+git+https://github.com/OperavonderVollmer/OperaPowerRelay@main
