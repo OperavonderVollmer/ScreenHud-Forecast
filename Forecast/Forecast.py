@@ -18,8 +18,29 @@ def get_time(time):
 
 
 def get_forecast(city = ""):
+         
+    """
+    Fetches the current and next day's weather forecast for a given city.
+
+    Parameters
+    ----------
+    city : str, optional
+        The city to fetch the forecast for. Defaults to an empty string.
+
+    Returns
+    -------
+    list
+        A list of dictionaries, each containing the forecast for a given hour. If the
+        request fails, an empty list is returned.
+
+    Notes
+    -----
+    The time format used is 24 hour format, and the returned forecast times are in
+    the format "HH:MM".
+    """
     
     url = f"https://wttr.in/{city}?format=j1" 
+        
     response = requests.get(url)
 
     if response.status_code != 200:
