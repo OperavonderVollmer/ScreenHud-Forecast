@@ -17,13 +17,9 @@ def get_time(time):
 
 
 
-def get_forecast(city = None):
+def get_forecast(city = ""):
     
-    if city:        
-        url = f"https://wttr.in/{city}?format=j1" 
-        
-    else:        
-        url = "https://wttr.in/?format=j1"
+    url = f"https://wttr.in/{city}?format=j1" 
     response = requests.get(url)
 
     if response.status_code != 200:
