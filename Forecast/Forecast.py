@@ -1,24 +1,8 @@
 from OperaPowerRelay import opr
-from dotenv import load_dotenv, set_key
-import os
-from pathlib import Path
 import requests
 from datetime import datetime
 
-load_dotenv()
 
-CITY = str(os.getenv('CITY'))
-HUD_HOST = str(os.getenv("HUD_HOST"))
-HUD_PORT = int(os.getenv("HUD_PORT"))
-
-def set_city(_city):
-    global CITY
-    CITY = _city
-
-    env_path = Path('.env')
-    set_key(env_path, 'CITY', CITY)
-
-    return True
 
 # Expected time format: HHMM
 # Will return {GB: 24:00, US: 12:00 AM}
@@ -30,7 +14,6 @@ def get_time(time):
         US_Code = "PM"
     
     return {"GB": f"{time[:-2]}:00", "US": f"{time[:-2]}:00 {US_Code}"}
-
 
 
 
@@ -48,6 +31,9 @@ def get_forecast(city):
     if "weather" not in data or not data["weather"]:
         return 
     
+    nearest_area = data.get("nearest_area")[0].get("areaName", "")[0].get("value", "")
+    country = data.get("nearest_area")[0].get("country", "")[0].get("value", "")
+
     today_date = data.get("weather", [{}])[0].get("date", "")
     today_forecast = data.get("weather", [{}])[0].get("hourly", [])
     
@@ -56,9 +42,11 @@ def get_forecast(city):
 
     for hour in today_forecast:
         hour["date"] = today_date
+        hour["city"] = f"{nearest_area}, {country}"
 
     for hour in tomorrow_forecast:
         hour["date"] = tomorrow_date
+        hour["city"] = f"{nearest_area}, {country}"
 
 
     total_forecasts = today_forecast + tomorrow_forecast
@@ -70,9 +58,10 @@ def get_forecast(city):
         t = get_time(forecast["time"])
         export.append({
             "date": forecast["date"],
+            "city": forecast["city"],
             "timeUS": t["US"],
             "timeGB": t["GB"],
-            "forecast": forecast["weatherDesc"][0]["value"],
+            "forecast": forecast["weatherDesc"][0]["value"].strip(),
             "tempC": forecast["tempC"],
             "tempF": forecast["tempF"],
             "fog": f'{forecast["chanceoffog"]}',
@@ -88,15 +77,4 @@ def get_forecast(city):
     
     return export
 
-    # More code here
 
-
-
-def main():
-    _ = get_forecast(CITY)
-    print(_)
-
-
-
-if __name__ == '__main__':
-    main()
