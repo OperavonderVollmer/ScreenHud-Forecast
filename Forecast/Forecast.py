@@ -40,18 +40,20 @@ def get_forecast(city = ""):
     """
     
     url = f"https://wttr.in/{city}?format=j1" 
+    print(url)
         
     response = requests.get(url)
 
     if response.status_code != 200:
-        return 
+        return None
 
     data = response.json()
     current_time = datetime.now().hour * 100
 
     if "weather" not in data or not data["weather"]:
-        return 
+        return None
     
+
     nearest_area = data.get("nearest_area")[0].get("areaName", "")[0].get("value", "")
     country = data.get("nearest_area")[0].get("country", "")[0].get("value", "")
 
@@ -61,13 +63,17 @@ def get_forecast(city = ""):
     tomorrow_date = data.get("weather", [{}])[1].get("date", "")
     tomorrow_forecast = data.get("weather", [{}])[1].get("hourly", [])
 
+
     for hour in today_forecast:
         hour["date"] = today_date
         hour["city"] = f"{nearest_area}, {country}"
+        hour["time"] = str(int(hour["time"])).zfill(4)
+
 
     for hour in tomorrow_forecast:
         hour["date"] = tomorrow_date
         hour["city"] = f"{nearest_area}, {country}"
+        hour["time"] = str(int(hour["time"]) + 2400).zfill(4)
 
 
     total_forecasts = today_forecast + tomorrow_forecast
@@ -85,15 +91,19 @@ def get_forecast(city = ""):
             "forecast": forecast["weatherDesc"][0]["value"].strip(),
             "tempC": forecast["tempC"],
             "tempF": forecast["tempF"],
-            "fog": f'{forecast["chanceoffog"]}',
-            "frost": f'{forecast["chanceoffrost"]}',
-            "hightemp": f'{forecast["chanceofhightemp"]}',
-            "overcast": f'{forecast["chanceofovercast"]}',
-            "rain": f'{forecast["chanceofrain"]}',
-            "snow": f'{forecast["chanceofsnow"]}',
-            "sunshine": f'{forecast["chanceofsunshine"]}',
-            "thunder": f'{forecast["chanceofthunder"]}',
-            "windy": f'{forecast["chanceofwindy"]}',
+            "chances":
+            {
+                "fog": f'{forecast["chanceoffog"]}',
+                "frost": f'{forecast["chanceoffrost"]}',
+                "hightemp": f'{forecast["chanceofhightemp"]}',
+                "overcast": f'{forecast["chanceofovercast"]}',
+                "rain": f'{forecast["chanceofrain"]}',
+                "snow": f'{forecast["chanceofsnow"]}',
+                "sunshine": f'{forecast["chanceofsunshine"]}',
+                "thunder": f'{forecast["chanceofthunder"]}',
+                "windy": f'{forecast["chanceofwindy"]}',
+            }
+            
         })
     
     return export
